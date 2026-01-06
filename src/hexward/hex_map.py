@@ -1,7 +1,17 @@
+from __future__ import annotations
+
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from .hex_util import GridOrientation, HexPoint, Size, cube_round, cube_ring
 from .hex_cell import HexCell
+
+if TYPE_CHECKING:
+    try:
+        import pygame
+    except ImportError:
+        # pygame not available - type hints will use string literals
+        pass
+
 
 # TODO: Add things so we can do map[point] and for cell in map.
 # TODO: Proper exceptions for when acting on an invalid cell (like pixel_to_hex)
@@ -127,11 +137,17 @@ class HexMap:
                 if point not in self:
                     self.set(point, None)
 
-    def draw(self, color: pygame.Color = pygame.Color(255, 255, 255), border_color: pygame.Color = pygame.Color(0, 0, 0), border_width: int = 1) -> pygame.Surface:
+    def draw(self, color: "pygame.Color | None" = None, border_color: "pygame.Color | None" = None, border_width: int = 1) -> "pygame.Surface":
         try:
             import pygame
         except ImportError:
             raise RuntimeError("Pygame is not installed. Drawing is not available.")
+        
+        # Set defaults inside the function
+        if color is None:
+            color = pygame.Color(255, 255, 255)
+        if border_color is None:
+            border_color = pygame.Color(0, 0, 0)
 
         # Handle empty grid case
         if not self._grid:
