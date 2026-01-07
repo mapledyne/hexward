@@ -101,7 +101,7 @@ class HexCell:
 
     @property
     def neighbors(self):
-        return [self + direction for direction in CUBE_DIRECTIONS]
+        return self._point.neighbors
 
     @property
     def size(self):

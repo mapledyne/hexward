@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from typing import TYPE_CHECKING, Any
-from .hex_util import GridOrientation, HexPoint, Size, cube_round, cube_ring
+from .hex_util import GridOrientation, HexPoint, Size, cube_round, cube_ring, to_hex_point
 from .hex_cell import HexCell
 
 if TYPE_CHECKING:
@@ -29,9 +29,11 @@ class HexMap:
         self._offset = Size(0, 0)
         self._cell_type = cell_type
 
-    def __contains__(self, point: HexPoint) -> bool:
-        if isinstance(point, HexPoint):
-            return point in self._grid
+    def __contains__(self, item: object) -> bool:
+        point = to_hex_point(item)
+        if point is None:
+            return False
+        return point in self._grid
     
     def __getitem__(self, point: HexPoint) -> HexCell:
         return self._grid[point]

@@ -39,6 +39,7 @@ from .hex_util import (
     hex_angles,
     direction_name,
     cube_round,
+    to_hex_point,
     CUBE_DIRECTIONS,
     DIRECTION_NAMES,
 )
@@ -65,6 +66,7 @@ __all__ = [
     "hex_angles",
     "direction_name",
     "cube_round",
+    "to_hex_point",
 
     # Constants
     "CUBE_DIRECTIONS",

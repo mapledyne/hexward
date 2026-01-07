@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from dataclasses import dataclass
-from typing import NamedTuple
+from typing import NamedTuple, Protocol
 
 # TODO: Considering caching sqrt(3) since it's used in many places
 # TODO: Add easy conversion from math degrees?
@@ -75,6 +75,10 @@ class HexPoint:
     
     def __hash__(self) -> int:
         return hash((self.q, self.r, self.s))
+
+    def neighbors(self) -> list['HexPoint']:
+        return [self + direction for direction in CUBE_DIRECTIONS]
+
 
 
 CUBE_DIRECTIONS = [
@@ -218,3 +222,52 @@ def cube_round(frac_q: float, frac_r: float, frac_s: float = None) -> HexPoint:
         s = -q-r
 
     return HexPoint(q, r, s)
+
+
+class SupportsHexPoint(Protocol):
+    """Protocol for objects that expose a HexPoint via a `point` attribute."""
+
+    @property
+    def point(self) -> HexPoint: ...
+
+
+def to_hex_point(item: object) -> HexPoint | None:
+    """Convert various hex-like inputs into a HexPoint.
+
+    This function normalizes different representations that can refer to a hex
+    coordinate into a concrete ``HexPoint`` instance. It accepts:
+
+    - a ``HexPoint`` (returned as-is)
+    - any object implementing :class:`SupportsHexPoint` (its ``.point`` is used)
+    - a ``tuple[int, int, int]`` interpreted as ``(q, r, s)``
+    - a ``str`` in the form "q,r,s" where all are integers
+
+    :param item: The value to normalize into a :class:`HexPoint`.
+    :type item: object
+    :returns: A :class:`HexPoint` if conversion succeeds; otherwise ``None``.
+    :rtype: HexPoint | None
+    """
+    if isinstance(item, HexPoint):
+        return item
+
+    # Duck-typed objects with a `.point` attribute
+    point_attr = getattr(item, "point", None)
+    if isinstance(point_attr, HexPoint):
+        return point_attr
+
+    # Accept a 3-tuple that can represent (q, r, s)
+    if isinstance(item, tuple) and len(item) == 3 and all(isinstance(v, int) for v in item):
+        q, r, s = item
+        return HexPoint(q, r, s)
+
+    # Accept a string in the format "q,r,s"
+    if isinstance(item, str):
+        parts = item.split(",")
+        if len(parts) == 3:
+            try:
+                q, r, s = (int(part.strip()) for part in parts)
+                return HexPoint(q, r, s)
+            except (ValueError, TypeError):
+                pass  # Not a valid set of integers; fall through to return None
+
+    return None
