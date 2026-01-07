@@ -70,8 +70,11 @@ class HexPoint:
         self._int = cube_to_spiral(self)
         return self._int
     
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"HexPoint(q={self.q}, r={self.r}, s={self.s})"
+
+    def __str__(self) -> str:
+        return f"(q={self.q}, r={self.r}, s={self.s})"
     
     def __hash__(self) -> int:
         return hash((self.q, self.r, self.s))

@@ -1,25 +1,25 @@
+import math
+from typing import Any
+
 from .hex_util import (
-    CUBE_DIRECTIONS,
     GridOrientation,
     HexPoint,
     Size,
-    _cube_to_oddr,
-    _oddr_to_cube,
+    _angle_to_math_angle,
     _cube_to_oddq,
+    _cube_to_oddr,
     _oddq_to_cube,
+    _oddr_to_cube,
     cube_distance,
     hex_angles,
-    _angle_to_math_angle,
-    _math_angle_to_angle,
 )
-from typing import Any
-import math
+
 
 class HexCell:
 
     # region Dunder Methods
 
-    def __init__(self, orientation: GridOrientation, point: HexPoint, radius: int, data: Any = None):
+    def __init__(self, orientation: GridOrientation, point: HexPoint, radius: int, data: Any = None) -> None:
         self._orientation = orientation
         self._radius = radius
         self._point = point
@@ -38,31 +38,31 @@ class HexCell:
     # region Properties
 
     @property
-    def orientation(self):
+    def orientation(self) -> GridOrientation:
         return self._orientation
     
     @property
-    def radius(self):
+    def radius(self) -> int:
         return self._radius
     
     @property
-    def point(self):
+    def point(self) -> HexPoint:
         return self._point
     
     @point.setter
-    def point(self, value: HexPoint):
+    def point(self, value: HexPoint) -> None:
         self._point = value
     
     @property
-    def q(self):
+    def q(self) -> int:
         return self._point.q
     
     @property
-    def r(self):
+    def r(self) -> int:
         return self._point.r
     
     @property
-    def s(self):
+    def s(self) -> int:
         return self._point.s
     
     @property
@@ -85,26 +85,26 @@ class HexCell:
             return _cube_to_oddq(self._point)
     
     @xy.setter
-    def xy(self, value: tuple[int, int]):
+    def xy(self, value: tuple[int, int]) -> None:
         if self.orientation == GridOrientation.POINTY_TOP:
             self._point = _oddr_to_cube(value[0], value[1])
         else:
             self._point = _oddq_to_cube(value[0], value[1])
     
     @property
-    def x(self):
+    def x(self) -> int:
         return self.xy[0]
     
     @property
-    def y(self):
+    def y(self) -> int:
         return self.xy[1]
 
     @property
-    def neighbors(self):
+    def neighbors(self) -> list[HexPoint]:
         return self._point.neighbors
 
     @property
-    def size(self):
+    def size(self) -> Size:
         if not self._size:
             size_long = 2 * self.radius
             size_short = math.sqrt(3) * self.radius
@@ -115,7 +115,7 @@ class HexCell:
         return self._size
     
     @property
-    def pixel_xy(self) -> tuple[int, int]:
+    def pixel_xy(self) -> tuple[int, int] | None:
         if self._pixel_xy is None:
         
             if self.orientation == GridOrientation.POINTY_TOP:
@@ -135,18 +135,18 @@ class HexCell:
         return self._pixel_xy
 
     @property
-    def corner_angles(self):
+    def corner_angles(self) -> tuple[int, int, int, int, int, int]:
         return hex_angles(self.orientation.toggle())
 
     @property
-    def edge_angles(self):
+    def edge_angles(self) -> tuple[int, int, int, int, int, int]:
         return hex_angles(self.orientation)
 
     # endregion Properties
 
     # region Methods
 
-    def clearcache(self):
+    def clearcache(self) -> None:
         self._pixel_xy = None
 
 #    def draw(self, color: pygame.Color, border_color: pygame.Color , border_width: int = 1) -> pygame.Surface:
