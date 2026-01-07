@@ -1,6 +1,6 @@
-from enum import Enum, auto
 from dataclasses import dataclass
-from typing import NamedTuple, Protocol
+from enum import Enum, auto
+from typing import NamedTuple
 
 # TODO: Considering caching sqrt(3) since it's used in many places
 # TODO: Add easy conversion from math degrees?
@@ -76,9 +76,9 @@ class HexPoint:
     def __hash__(self) -> int:
         return hash((self.q, self.r, self.s))
 
+    @property
     def neighbors(self) -> list['HexPoint']:
         return [self + direction for direction in CUBE_DIRECTIONS]
-
 
 
 CUBE_DIRECTIONS = [
@@ -94,7 +94,7 @@ class GridOrientation(Enum):
     POINTY_TOP = auto()
     FLAT_TOP = auto()
 
-    def toggle(self):
+    def toggle(self) -> 'GridOrientation':
         if self == GridOrientation.POINTY_TOP:
             return GridOrientation.FLAT_TOP
         return GridOrientation.POINTY_TOP
@@ -139,11 +139,11 @@ def cube_distance(a: HexPoint, b: HexPoint) -> int:
     return (abs(a.q - b.q) + abs(a.r - b.r) + abs(a.s - b.s)) // 2
 
 
-def cube_neighbor(hex: HexPoint, direction: int) -> HexPoint:
+def cube_neighbor(hex: HexPoint, direction: int) -> 'HexPoint':
     return hex + CUBE_DIRECTIONS[direction]
 
 
-def cube_ring(center: HexPoint, radius: int) -> list[HexPoint]:
+def cube_ring(center: HexPoint, radius: int) -> list['HexPoint']:
     """ Return a list of cells that are <radius> distance from the center."""
     if radius < 0:
         raise ValueError("Radius must be positive")
@@ -190,7 +190,7 @@ def spiral_to_cube(index: int) -> HexPoint:
     ringstart = _spiral_index_start_of_ring(radius)
     return cube_ring(center, radius)[index - ringstart]
 
-def hex_angles(orientation: GridOrientation):
+def hex_angles(orientation: GridOrientation) -> tuple[int, int, int, int, int, int]:
     if orientation == GridOrientation.POINTY_TOP:
         return (90, 150, 210, 270, 330, 30)
 
@@ -202,7 +202,7 @@ def direction_name(angle: int) -> str:
         return DIRECTION_NAMES[angle]
     raise ValueError(f"Invalid angle: {angle}")
 
-def cube_round(frac_q: float, frac_r: float, frac_s: float = None) -> HexPoint:
+def cube_round(frac_q: float, frac_r: float, frac_s: float | None = None) -> HexPoint:
 
     if frac_s is None:
         frac_s = -frac_q - frac_r
@@ -224,13 +224,6 @@ def cube_round(frac_q: float, frac_r: float, frac_s: float = None) -> HexPoint:
     return HexPoint(q, r, s)
 
 
-class SupportsHexPoint(Protocol):
-    """Protocol for objects that expose a HexPoint via a `point` attribute."""
-
-    @property
-    def point(self) -> HexPoint: ...
-
-
 def to_hex_point(item: object) -> HexPoint | None:
     """Convert various hex-like inputs into a HexPoint.
 
@@ -238,7 +231,7 @@ def to_hex_point(item: object) -> HexPoint | None:
     coordinate into a concrete ``HexPoint`` instance. It accepts:
 
     - a ``HexPoint`` (returned as-is)
-    - any object implementing :class:`SupportsHexPoint` (its ``.point`` is used)
+    - any object with a ``.point`` attribute that returns a ``HexPoint``
     - a ``tuple[int, int, int]`` interpreted as ``(q, r, s)``
     - a ``str`` in the form "q,r,s" where all are integers
 
